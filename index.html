@@ -78,7 +78,7 @@ button{ font-family:inherit; }
   position:relative; z-index:2;
 }
 .topbar img{ height:22px; width:auto; opacity:.92; }
-.topbar .cafe-logo{ display:none; height:120px; width:auto; max-width:180px; }
+.topbar .cafe-logo{ display:none; height:55px; width:auto; max-width:140px; }
 
 /* ===== screens ===== */
 .screen{
@@ -443,7 +443,6 @@ button{ font-family:inherit; }
   <!-- ===================== LANDING ===================== -->
   <section class="screen active" id="screen-landing">
     <div class="landing-96" aria-hidden="true">٩٦</div>
-    <div class="rise d1"><span class="eyebrow" id="eyebrow-text">خماس × اليوم الوطني ٩٦</span></div>
     <h1 class="landing-title rise d2">شاركنا تحدي<br>اليوم الوطني </h1>
     <p class="landing-sub rise d3">اكتشف الكلمة قبل انتهاء الوقت، واربح مكافأة من خماس.</p>
     <button class="btn-primary rise d4" id="btn-start">ابدأ التحدي</button>
@@ -788,7 +787,6 @@ button{ font-family:inherit; }
     document.documentElement.style.setProperty('--plum', CAFE.primary);
     document.documentElement.style.setProperty('--olive', CAFE.accent);
     document.documentElement.style.setProperty('--indigo', CAFE.highlight);
-    $('eyebrow-text').textContent = `خماس × ${CAFE.name} — اليوم الوطني ٩٦`;
     $('coupon-brand').textContent = CAFE.name;
     $('coupon-value').textContent = CAFE.discount;
     $('coupon-desc').textContent = `على طلبك القادم من ${CAFE.name}، احتفالًا بفوزك في التحدي`;
