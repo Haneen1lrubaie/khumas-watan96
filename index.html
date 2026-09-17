@@ -237,6 +237,18 @@ button{ font-family:inherit; }
 @keyframes coreReveal{ 0%{transform:scale(1)} 40%{transform:scale(1.22)} 100%{transform:scale(1)} }
 
 .bank-label{ text-align:center; font-size:.78rem; color:rgba(234,240,243,.4); margin-bottom:12px; }
+
+.puzzle-grid{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:6px;
+  width:min(78vw,300px); aspect-ratio:1;
+}
+.puzzle-tile{
+  border-radius:12px; cursor:pointer; background-size:300% 300%;
+  border:2.5px solid transparent; transition:border-color .2s, transform .2s;
+  box-shadow:0 6px 14px rgba(0,0,0,.25);
+}
+.puzzle-tile.selected{ border-color:var(--olive); transform:scale(.94); }
+.puzzle-tile.correct{ border-color:rgba(183,190,95,.55); }
 .bank{ display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:auto; }
 .tile{
   width:52px; height:52px; border-radius:14px;
@@ -391,14 +403,35 @@ button{ font-family:inherit; }
     <div class="bank" id="bank"></div>
   </section>
 
+  <!-- ===================== PUZZLE (بزل ثقافي) ===================== -->
+  <section class="screen" id="screen-puzzle">
+    <div class="cw-header">
+      <div class="cw-timer">
+        <svg viewBox="0 0 56 56">
+          <circle class="bg" cx="28" cy="28" r="24"></circle>
+          <circle class="fg" id="puzzle-timer-ring" cx="28" cy="28" r="24" stroke-dasharray="150.8" stroke-dashoffset="0"></circle>
+        </svg>
+        <span id="puzzle-timer-num">٦٠</span>
+      </div>
+      <div class="cw-title"> <b>رتّب اللوحة</b></div>
+      <div style="width:56px"></div>
+    </div>
+
+    <div class="grid-wrap">
+      <div class="puzzle-grid" id="puzzle-grid"></div>
+    </div>
+
+    <div class="bank-label">اضغط قطعتين لتبديل أماكنهما</div>
+  </section>
+
   <!-- ===================== INSTRUCTIONS SHEET ===================== -->
   <div id="sheet-instructions">
     <div class="sheet-backdrop"></div>
     <div class="sheet">
       <div class="sheet-handle"></div>
       <h3>كيف تلعب؟</h3>
-      <div class="sheet-line"><span class="sheet-num">١</span><span>٣ كلمات قصيرة تقودك إلى الكلمة الرئيسية «وطن».</span></div>
-      <div class="sheet-line"><span class="sheet-num">٢</span><span>اضغط حروف كل كلمة بالترتيب الصحيح قبل نفاد الوقت.</span></div>
+      <div class="sheet-line"><span class="sheet-num">١</span><span id="sheet-line-1">٣ كلمات قصيرة تقودك إلى الكلمة الرئيسية «وطن».</span></div>
+      <div class="sheet-line"><span class="sheet-num">٢</span><span id="sheet-line-2">اضغط حروف كل كلمة بالترتيب الصحيح قبل نفاد الوقت.</span></div>
       <div class="claim-field">
         <label for="player-name">الاسم</label>
         <input type="text" id="player-name" placeholder="اسمك الكامل">
@@ -637,7 +670,7 @@ button{ font-family:inherit; }
 
   // ================= CAFE THEME (كل كافيه له صف في جدول Cafes، يتحدد عبر ?cafe=xxx بالرابط) =================
   const CAFE_ID = new URLSearchParams(location.search).get('cafe') || 'demo';
-  let CAFE = { id: CAFE_ID, name: 'خماس', primary: '#2B1A32', accent: '#B7BE5F', highlight: '#3B2E6A', logo: null, limit: 15, discount: '١٥٪ خصم', active: true };
+  let CAFE = { id: CAFE_ID, name: 'خماس', primary: '#2B1A32', accent: '#B7BE5F', highlight: '#3B2E6A', logo: null, limit: 15, discount: '١٥٪ خصم', active: true, game: 'crossword' };
   let PLAYER_NAME = '';
   let PLAYER_PHONE = '';
 
@@ -654,7 +687,8 @@ button{ font-family:inherit; }
           logo: data.logo || null,
           limit: data.limit || 15,
           discount: data.discount || CAFE.discount,
-          active: data.active !== false
+          active: data.active !== false,
+          game: data.game || 'crossword'
         };
       }
     } catch(e){ /* ما فيه اتصال أو الكافيه غير موجود — نكمل بثيم خماس الافتراضي */ }
@@ -800,10 +834,118 @@ button{ font-family:inherit; }
     renderAdmin();
   });
 
+  // ================= PUZZLE (بزل ثقافي — رسمة أصلية بروح اليوم الوطني) =================
+  const PUZZLE_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMzAwIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ic2t5IiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMxQzEwMjMiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI1NSUiIHN0b3AtY29sb3I9IiM0QTM1NTYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjRThBMzNEIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJkdW5lIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNEOUE0NjEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjQjc4MzNGIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0idXJsKCNza3kpIi8+CiAgPGNpcmNsZSBjeD0iNDAiIGN5PSIzNSIgcj0iMS42IiBmaWxsPSIjRUFGMEYzIiBvcGFjaXR5PSIuOCIvPgogIDxjaXJjbGUgY3g9IjcwIiBjeT0iNTUiIHI9IjEuMiIgZmlsbD0iI0VBRjBGMyIgb3BhY2l0eT0iLjciLz4KICA8Y2lyY2xlIGN4PSIxMTAiIGN5PSIzMCIgcj0iMS40IiBmaWxsPSIjRUFGMEYzIiBvcGFjaXR5PSIuOCIvPgogIDxjaXJjbGUgY3g9IjE4MCIgY3k9IjM1IiByPSIxLjEiIGZpbGw9IiNFQUYwRjMiIG9wYWNpdHk9Ii42Ii8+CgogIDwhLS0gY3Jlc2NlbnQgbW9vbiAtLT4KICA8Y2lyY2xlIGN4PSIyMzgiIGN5PSI0OCIgcj0iMTciIGZpbGw9IiNGNEY3RjkiLz4KICA8Y2lyY2xlIGN4PSIyNDciIGN5PSI0MSIgcj0iMTQuNSIgZmlsbD0iIzI0MTUzMCIvPgoKICA8IS0tIGZhbGNvbiwgaW4gZmxpZ2h0LCBjbGVhciBvZiBvdGhlciBlbGVtZW50cyAtLT4KICA8cGF0aCBkPSJNNzUsNzggQzY4LDcyIDU2LDczIDQ4LDgwIEM1Nyw3OSA2NCw4MiA2OSw4NyBDNjEsODYgNTEsODkgNDYsOTQgQzU3LDkyIDY2LDkwIDc1LDkyIEM4NCw5MCA5Myw5MiAxMDQsOTQgQzk5LDg5IDg5LDg2IDgxLDg3IEM4Niw4MiA5Myw3OSAxMDIsODAgQzk0LDczIDgyLDcyIDc1LDc4IFoiIGZpbGw9IiMxQzEwMjMiIG9wYWNpdHk9Ii44MiIvPgoKICA8dGV4dCB4PSIxNjAiIHk9IjE1MCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtc2l6ZT0iNzAiIGZpbGw9IiNFQUYwRjMiIG9wYWNpdHk9Ii4xMyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+OTY8L3RleHQ+CgogIDxwYXRoIGQ9Ik0wLDIxMCBRNzUsMTgwIDE1MCwyMDUgVDMwMCwxOTUgTDMwMCwzMDAgTDAsMzAwIFoiIGZpbGw9InVybCgjZHVuZSkiIG9wYWNpdHk9Ii41NSIvPgogIDxwYXRoIGQ9Ik0wLDI0MCBRODAsMjA1IDE2MCwyMzUgVDMwMCwyMjUgTDMwMCwzMDAgTDAsMzAwIFoiIGZpbGw9InVybCgjZHVuZSkiLz4KCiAgPCEtLSBwYWxtIDEgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTUsMTkwKSI+CiAgICA8cGF0aCBkPSJNMCw5MCBDNCw2MCAyLDM1IDAsMTAiIHN0cm9rZT0iIzJCMUEzMiIgc3Ryb2tlLXdpZHRoPSI0IiBmaWxsPSJub25lIi8+CiAgICA8cGF0aCBkPSJNMCwxMCBDLTE4LDAgLTMwLDYgLTM0LC00IEMtMjAsLTIgLTgsNCAwLDEwIFoiIGZpbGw9IiMyQjFBMzIiLz4KICAgIDxwYXRoIGQ9Ik0wLDEwIEMxOCwwIDMwLDYgMzQsLTQgQzIwLC0yIDgsNCAwLDEwIFoiIGZpbGw9IiMyQjFBMzIiLz4KICAgIDxwYXRoIGQ9Ik0wLDEwIEMtMTQsLTYgLTIyLC0xOCAtMjAsLTI4IEMtMTAsLTE4IC00LC00IDAsMTAgWiIgZmlsbD0iIzJCMUEzMiIvPgogICAgPHBhdGggZD0iTTAsMTAgQzE0LC02IDIyLC0xOCAyMCwtMjggQzEwLC0xOCA0LC00IDAsMTAgWiIgZmlsbD0iIzJCMUEzMiIvPgogICAgPHBhdGggZD0iTTAsMTAgQy00LC0xNCAtMiwtMjYgNCwtMzQgQzYsLTIyIDQsLTggMCwxMCBaIiBmaWxsPSIjMkIxQTMyIi8+CiAgPC9nPgogIDwhLS0gcGFsbSAyIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDk1LDIwNSkgc2NhbGUoLjc1KSI+CiAgICA8cGF0aCBkPSJNMCw5MCBDNCw2MCAyLDM1IDAsMTAiIHN0cm9rZT0iIzJCMUEzMiIgc3Ryb2tlLXdpZHRoPSI0IiBmaWxsPSJub25lIi8+CiAgICA8cGF0aCBkPSJNMCwxMCBDLTE4LDAgLTMwLDYgLTM0LC00IEMtMjAsLTIgLTgsNCAwLDEwIFoiIGZpbGw9IiMyQjFBMzIiLz4KICAgIDxwYXRoIGQ9Ik0wLDEwIEMxOCwwIDMwLDYgMzQsLTQgQzIwLC0yIDgsNCAwLDEwIFoiIGZpbGw9IiMyQjFBMzIiLz4KICAgIDxwYXRoIGQ9Ik0wLDEwIEMtMTQsLTYgLTIyLC0xOCAtMjAsLTI4IEMtMTAsLTE4IC00LC00IDAsMTAgWiIgZmlsbD0iIzJCMUEzMiIvPgogICAgPHBhdGggZD0iTTAsMTAgQzE0LC02IDIyLC0xOCAyMCwtMjggQzEwLC0xOCA0LC00IDAsMTAgWiIgZmlsbD0iIzJCMUEzMiIvPgogIDwvZz4KCiAgPCEtLSBjYW1lbDogY2xlYXJlciBzaWRlIHNpbGhvdWV0dGUgd2l0aCBsZWdzLCBodW1wLCBuZWNrK2hlYWQgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTcyLDIxMikiPgogICAgPHJlY3QgeD0iNiIgeT0iNDgiIHdpZHRoPSI0IiBoZWlnaHQ9IjE0IiBmaWxsPSIjMUMxMDIzIi8+CiAgICA8cmVjdCB4PSIxOCIgeT0iNDgiIHdpZHRoPSI0IiBoZWlnaHQ9IjE0IiBmaWxsPSIjMUMxMDIzIi8+CiAgICA8cmVjdCB4PSIzNiIgeT0iNDgiIHdpZHRoPSI0IiBoZWlnaHQ9IjE0IiBmaWxsPSIjMUMxMDIzIi8+CiAgICA8cmVjdCB4PSI0OCIgeT0iNDgiIHdpZHRoPSI0IiBoZWlnaHQ9IjE0IiBmaWxsPSIjMUMxMDIzIi8+CiAgICA8cGF0aCBkPSJNNCw0OCBMNCwzNCBRNCwyNiAxMiwyNSBRMTQsMTIgMjQsOCBRMjYsMiAyNCwtNCBRMzQsLTYgMzQsNCBRMzQsMTAgMzAsMTQgUTQwLDEyIDQ2LDE4IFE1NiwyMCA1OCwzMCBRNjAsMzYgNTQsNDAgTDU0LDQ4IEw0OCw0OCBMNDgsMzggTDEwLDM4IEwxMCw0OCBaIiBmaWxsPSIjMUMxMDIzIi8+CiAgICA8ZWxsaXBzZSBjeD0iNTgiIGN5PSIxOCIgcng9IjUiIHJ5PSI0IiBmaWxsPSIjMUMxMDIzIi8+CiAgPC9nPgoKICA8IS0tIGRhbGxhaCAoQXJhYmljIGNvZmZlZSBwb3QpICsgY3VwIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMiwyNDQpIj4KICAgIDxwYXRoIGQ9Ik0yMCw1MCBDOCw1MCA0LDQwIDgsMzIgQzQsMjYgNiwxOCAxMiwxNCBMMTIsNiBDMTIsMiAxNiwwIDIwLDAgQzI0LDAgMjgsMiAyOCw2IEwyOCwxMiBDMzQsMTAgMzgsMTQgMzYsMjAgQzQwLDI2IDM4LDM0IDMyLDM2IEwzMiw0NCBDMzYsNDYgMzQsNTAgMjYsNTAgWiIgZmlsbD0iIzJCMUEzMiIvPgogICAgPHBhdGggZD0iTTE3LDAgTDIwLC04IEwyMywwIFoiIGZpbGw9IiMyQjFBMzIiLz4KICAgIDxwYXRoIGQ9Ik05LDE2IEMwLDE0IC03LDE4IC05LDI1IEMtNCwyMiAzLDIyIDksMjQgWiIgZmlsbD0iIzJCMUEzMiIvPgogICAgPHBhdGggZD0iTTM0LDIyIEM0MywyMiA0NSwzMyAzNiwzNyBDNDAsMzAgMzgsMjUgMzQsMjYgWiIgZmlsbD0iIzJCMUEzMiIvPgogICAgPHJlY3QgeD0iNDQiIHk9IjQzIiB3aWR0aD0iMTIiIGhlaWdodD0iOSIgcng9IjIiIGZpbGw9IiMyQjFBMzIiLz4KICA8L2c+CgogIDxnIHN0cm9rZT0iI0I3ODMzRiIgc3Ryb2tlLXdpZHRoPSIxLjUiIG9wYWNpdHk9Ii41Ij4KICAgIDxwYXRoIGQ9Ik0wLDI5NiBMOCwyODggTDE2LDI5NiIvPjxwYXRoIGQ9Ik0yMCwyOTYgTDI4LDI4OCBMMzYsMjk2Ii8+PHBhdGggZD0iTTQwLDI5NiBMNDgsMjg4IEw1NiwyOTYiLz4KICAgIDxwYXRoIGQ9Ik02MCwyOTYgTDY4LDI4OCBMNzYsMjk2Ii8+PHBhdGggZD0iTTgwLDI5NiBMODgsMjg4IEw5NiwyOTYiLz48cGF0aCBkPSJNMTAwLDI5NiBMMTA4LDI4OCBMMTE2LDI5NiIvPgogICAgPHBhdGggZD0iTTEyMCwyOTYgTDEyOCwyODggTDEzNiwyOTYiLz48cGF0aCBkPSJNMTQwLDI5NiBMMTQ4LDI4OCBMMTU2LDI5NiIvPjxwYXRoIGQ9Ik0xNjAsMjk2IEwxNjgsMjg4IEwxNzYsMjk2Ii8+CiAgICA8cGF0aCBkPSJNMTgwLDI5NiBMMTg4LDI4OCBMMTk2LDI5NiIvPjxwYXRoIGQ9Ik0yMDAsMjk2IEwyMDgsMjg4IEwyMTYsMjk2Ii8+PHBhdGggZD0iTTIyMCwyOTYgTDIyOCwyODggTDIzNiwyOTYiLz4KICAgIDxwYXRoIGQ9Ik0yNDAsMjk2IEwyNDgsMjg4IEwyNTYsMjk2Ii8+PHBhdGggZD0iTTI2MCwyOTYgTDI2OCwyODggTDI3NiwyOTYiLz48cGF0aCBkPSJNMjgwLDI5NiBMMjg4LDI4OCBMMjk2LDI5NiIvPgogIDwvZz4KPC9zdmc+Cg==';
+  let puzzleState = [];      // puzzleState[slotIndex] = correctIndex الموجود حاليًا بهذي الخانة
+  let puzzleSelected = null;
+  let puzzleTimerInterval = null;
+  let puzzleTimeLeft = 60;
+
+  function shuffledPuzzleOrder(){
+    let arr = [0,1,2,3,4,5,6,7,8];
+    let solved = true;
+    while (solved){
+      for (let i = arr.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      solved = arr.every((v, i) => v === i);
+    }
+    return arr;
+  }
+
+  function renderPuzzleTile(slotIndex){
+    const el = document.getElementById('puzzle-tile-' + slotIndex);
+    if (!el) return;
+    const correctIndex = puzzleState[slotIndex];
+    const col = correctIndex % 3, row = Math.floor(correctIndex / 3);
+    el.style.backgroundImage = `url(${PUZZLE_IMAGE})`;
+    el.style.backgroundPosition = `${col * 50}% ${row * 50}%`;
+    el.classList.toggle('correct', correctIndex === slotIndex);
+  }
+
+  function resetPuzzle(){
+    puzzleSelected = null;
+    gameLocked = false;
+    puzzleState = shuffledPuzzleOrder();
+    const gridEl = $('puzzle-grid');
+    gridEl.innerHTML = '';
+    for (let i = 0; i < 9; i++){
+      const tile = document.createElement('div');
+      tile.className = 'puzzle-tile';
+      tile.id = 'puzzle-tile-' + i;
+      tile.addEventListener('click', () => onPuzzleTileClick(i));
+      gridEl.appendChild(tile);
+      renderPuzzleTile(i);
+    }
+  }
+
+  function onPuzzleTileClick(slotIndex){
+    if (gameLocked) return;
+    const el = document.getElementById('puzzle-tile-' + slotIndex);
+    if (puzzleSelected === null){
+      puzzleSelected = slotIndex;
+      el.classList.add('selected');
+      return;
+    }
+    if (puzzleSelected === slotIndex){
+      el.classList.remove('selected');
+      puzzleSelected = null;
+      return;
+    }
+    const prevEl = document.getElementById('puzzle-tile-' + puzzleSelected);
+    const tmp = puzzleState[puzzleSelected];
+    puzzleState[puzzleSelected] = puzzleState[slotIndex];
+    puzzleState[slotIndex] = tmp;
+    renderPuzzleTile(puzzleSelected);
+    renderPuzzleTile(slotIndex);
+    if (prevEl) prevEl.classList.remove('selected');
+    puzzleSelected = null;
+    if (puzzleState.every((v, i) => v === i)){
+      clearInterval(puzzleTimerInterval);
+      winGame();
+    }
+  }
+
+  function startPuzzleTimer(){
+    puzzleTimeLeft = 60;
+    $('puzzle-timer-num').textContent = toArabicDigits(puzzleTimeLeft);
+    $('puzzle-timer-ring').style.stroke = 'var(--olive)';
+    $('puzzle-timer-ring').style.strokeDashoffset = 0;
+    clearInterval(puzzleTimerInterval);
+    puzzleTimerInterval = setInterval(() => {
+      puzzleTimeLeft--;
+      $('puzzle-timer-num').textContent = toArabicDigits(Math.max(puzzleTimeLeft, 0));
+      const offset = RING_CIRC * (1 - puzzleTimeLeft / 60);
+      $('puzzle-timer-ring').style.strokeDashoffset = offset;
+      if (puzzleTimeLeft <= 10) $('puzzle-timer-ring').style.stroke = 'var(--mauve)';
+      if (puzzleTimeLeft <= 0){
+        clearInterval(puzzleTimerInterval);
+        timesUp();
+      }
+    }, 1000);
+  }
+
+  function updateInstructionsText(){
+    if (CAFE.game === 'puzzle'){
+      $('sheet-line-1').textContent = 'رتّب القطع التسع لتكوين لوحة اليوم الوطني.';
+      $('sheet-line-2').textContent = 'اضغط قطعتين لتبديل أماكنهما قبل نفاد الوقت.';
+    } else {
+      $('sheet-line-1').textContent = '٣ كلمات قصيرة تقودك إلى الكلمة الرئيسية «وطن».';
+      $('sheet-line-2').textContent = 'اضغط حروف كل كلمة بالترتيب الصحيح قبل نفاد الوقت.';
+    }
+  }
+
   // ---------- navigation ----------
   $('btn-start').addEventListener('click', () => {
-    resetCrossword();
-    showScreen('screen-crossword');
+    if (CAFE.game === 'puzzle'){
+      resetPuzzle();
+      showScreen('screen-puzzle');
+    } else {
+      resetCrossword();
+      showScreen('screen-crossword');
+    }
+    updateInstructionsText();
     $('topbar').style.display = 'none';
     $('sheet-instructions').classList.add('active');
   });
@@ -820,7 +962,11 @@ button{ font-family:inherit; }
     PLAYER_NAME = name;
     PLAYER_PHONE = phone;
     $('sheet-instructions').classList.remove('active');
-    startTimer();
+    if (CAFE.game === 'puzzle'){
+      startPuzzleTimer();
+    } else {
+      startTimer();
+    }
   });
 
   $('btn-to-gifts-win').addEventListener('click', () => { location.href = 'https://khumas-96-services.vercel.app/'; });
