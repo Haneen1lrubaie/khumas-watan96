@@ -249,6 +249,30 @@ button{ font-family:inherit; }
 }
 .puzzle-tile.selected{ border-color:var(--olive); transform:scale(.94); }
 .puzzle-tile.correct{ border-color:rgba(183,190,95,.55); }
+
+.math-question{ font-family:'Zain'; font-weight:800; font-size:clamp(2.2rem,10vw,3.1rem); text-align:center; margin:38px 0 32px; color:var(--pearl); }
+.math-answers{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; width:min(80vw,320px); margin:0 auto; }
+.math-answer-btn{
+  background:var(--pearl); color:var(--plum); font-family:'Zain'; font-size:1.5rem; font-weight:700;
+  border:none; border-radius:18px; padding:22px 10px; cursor:pointer;
+  transition:transform .2s var(--pop), background .2s, color .2s;
+  box-shadow:0 8px 18px rgba(0,0,0,.2);
+}
+.math-answer-btn:active{ transform:scale(.93); }
+.math-answer-btn.wrong{ animation:shake .4s; background:var(--mauve); color:var(--pearl); }
+
+.memory-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; width:min(88vw,340px); margin:0 auto; }
+.memory-card{
+  aspect-ratio:1; border-radius:14px; border:1.5px solid rgba(234,240,243,.15);
+  background:rgba(234,240,243,.06); cursor:pointer; padding:8px;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .22s var(--pop), background .22s, border-color .22s;
+}
+.memory-card svg{ width:100%; height:100%; display:none; }
+.memory-card.flipped{ background:var(--pearl); border-color:var(--olive); animation:cellPop .3s var(--pop); }
+.memory-card.flipped svg{ display:block; }
+.memory-card.matched{ opacity:.45; cursor:default; }
+.memory-card:active{ transform:scale(.92); }
 .bank{ display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:auto; }
 .tile{
   width:52px; height:52px; border-radius:14px;
@@ -422,6 +446,41 @@ button{ font-family:inherit; }
     </div>
 
     <div class="bank-label">اضغط قطعتين لتبديل أماكنهما</div>
+  </section>
+
+  <!-- ===================== MATH CHALLENGE ===================== -->
+  <section class="screen" id="screen-math">
+    <div class="cw-header">
+      <div class="cw-timer">
+        <svg viewBox="0 0 56 56">
+          <circle class="bg" cx="28" cy="28" r="24"></circle>
+          <circle class="fg" id="math-timer-ring" cx="28" cy="28" r="24" stroke-dasharray="150.8" stroke-dashoffset="0"></circle>
+        </svg>
+        <span id="math-timer-num">٦٠</span>
+      </div>
+      <div class="cw-title"> <b id="math-progress">١ / ٥</b></div>
+      <div style="width:56px"></div>
+    </div>
+
+    <div class="math-question" id="math-question">٧ + ٥</div>
+    <div class="math-answers" id="math-answers"></div>
+  </section>
+
+  <!-- ===================== MEMORY MATCH ===================== -->
+  <section class="screen" id="screen-memory">
+    <div class="cw-header">
+      <div class="cw-timer">
+        <svg viewBox="0 0 56 56">
+          <circle class="bg" cx="28" cy="28" r="24"></circle>
+          <circle class="fg" id="memory-timer-ring" cx="28" cy="28" r="24" stroke-dasharray="150.8" stroke-dashoffset="0"></circle>
+        </svg>
+        <span id="memory-timer-num">٦٠</span>
+      </div>
+      <div class="cw-title"> <b>لاقِ الأزواج</b></div>
+      <div style="width:56px"></div>
+    </div>
+
+    <div class="memory-grid" id="memory-grid"></div>
   </section>
 
   <!-- ===================== INSTRUCTIONS SHEET ===================== -->
@@ -926,10 +985,191 @@ button{ font-family:inherit; }
     }, 1000);
   }
 
+  // ================= MATH CHALLENGE =================
+  const MATH_TOTAL = 5;
+  let mathQuestionIndex = 0;
+  let mathCorrectAnswer = 0;
+  let mathTimerInterval = null;
+  let mathTimeLeft = 60;
+
+  function generateMathQuestion(){
+    const ops = ['+','-','×'];
+    const op = ops[Math.floor(Math.random() * ops.length)];
+    let a, b, answer;
+    if (op === '+'){
+      a = 1 + Math.floor(Math.random() * 50);
+      b = 1 + Math.floor(Math.random() * 50);
+      answer = a + b;
+    } else if (op === '-'){
+      a = 10 + Math.floor(Math.random() * 50);
+      b = 1 + Math.floor(Math.random() * a);
+      answer = a - b;
+    } else {
+      a = 2 + Math.floor(Math.random() * 11);
+      b = 2 + Math.floor(Math.random() * 11);
+      answer = a * b;
+    }
+    mathCorrectAnswer = answer;
+    $('math-question').textContent = `${toArabicDigits(a)} ${op} ${toArabicDigits(b)}`;
+    $('math-progress').textContent = `${toArabicDigits(mathQuestionIndex + 1)} / ${toArabicDigits(MATH_TOTAL)}`;
+
+    const options = new Set([answer]);
+    while (options.size < 4){
+      const delta = [1,2,3,5,10,-1,-2,-3,-5,-10][Math.floor(Math.random() * 10)];
+      const candidate = answer + delta;
+      if (candidate >= 0 && candidate !== answer) options.add(candidate);
+    }
+    const optionsArr = shuffle([...options]);
+    const answersEl = $('math-answers');
+    answersEl.innerHTML = '';
+    optionsArr.forEach(val => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'math-answer-btn';
+      btn.textContent = toArabicDigits(val);
+      btn.addEventListener('click', () => onMathAnswer(val, btn));
+      answersEl.appendChild(btn);
+    });
+  }
+
+  function onMathAnswer(val, btn){
+    if (gameLocked) return;
+    if (val === mathCorrectAnswer){
+      mathQuestionIndex++;
+      if (mathQuestionIndex >= MATH_TOTAL){
+        clearInterval(mathTimerInterval);
+        winGame();
+      } else {
+        generateMathQuestion();
+      }
+    } else {
+      btn.classList.add('wrong');
+      setTimeout(() => btn.classList.remove('wrong'), 400);
+    }
+  }
+
+  function resetMath(){
+    gameLocked = false;
+    mathQuestionIndex = 0;
+    generateMathQuestion();
+  }
+
+  function startMathTimer(){
+    mathTimeLeft = 60;
+    $('math-timer-num').textContent = toArabicDigits(mathTimeLeft);
+    $('math-timer-ring').style.stroke = 'var(--olive)';
+    $('math-timer-ring').style.strokeDashoffset = 0;
+    clearInterval(mathTimerInterval);
+    mathTimerInterval = setInterval(() => {
+      mathTimeLeft--;
+      $('math-timer-num').textContent = toArabicDigits(Math.max(mathTimeLeft, 0));
+      const offset = RING_CIRC * (1 - mathTimeLeft / 60);
+      $('math-timer-ring').style.strokeDashoffset = offset;
+      if (mathTimeLeft <= 10) $('math-timer-ring').style.stroke = 'var(--mauve)';
+      if (mathTimeLeft <= 0){
+        clearInterval(mathTimerInterval);
+        timesUp();
+      }
+    }, 1000);
+  }
+
+  // ================= MEMORY MATCH =================
+  const MEMORY_ICONS = [
+    '<circle cx="20" cy="20" r="11" fill="var(--plum)"/><circle cx="26" cy="15" r="9" fill="var(--pearl)"/>',
+    '<path d="M20,4 L24,15 L36,15 L26,22 L30,34 L20,27 L10,34 L14,22 L4,15 L16,15 Z" fill="var(--plum)"/>',
+    '<path d="M10,14 L28,14 L26,28 Q19,32 12,28 Z" fill="none" stroke="var(--plum)" stroke-width="2.5"/><path d="M28,17 Q35,17 34,23 Q33,27 27,26" fill="none" stroke="var(--plum)" stroke-width="2.5"/>',
+    '<g stroke="var(--plum)" stroke-width="3" stroke-linecap="round" fill="none"><path d="M20,32 L20,10"/><path d="M20,32 L8,14"/><path d="M20,32 L32,14"/><path d="M20,32 L4,24"/><path d="M20,32 L36,24"/></g>',
+    '<text x="20" y="27" font-family="\'Zain\'" font-weight="800" font-size="20" fill="var(--plum)" text-anchor="middle">٩٦</text>',
+    '<path d="M20,6 L34,20 L20,34 L6,20 Z" fill="none" stroke="var(--plum)" stroke-width="2.5"/><path d="M20,6 L20,34 M6,20 L34,20" stroke="var(--plum)" stroke-width="1.5"/>'
+  ];
+  let memoryIcons = [];
+  let memoryMatched = [];
+  let memoryFlipped = [];
+  let memoryLocked = false;
+  let memoryTimerInterval = null;
+  let memoryTimeLeft = 60;
+
+  function resetMemory(){
+    gameLocked = false;
+    memoryFlipped = [];
+    memoryLocked = false;
+    memoryMatched = new Array(12).fill(false);
+    memoryIcons = shuffle([0,1,2,3,4,5,0,1,2,3,4,5]);
+    const gridEl = $('memory-grid');
+    gridEl.innerHTML = '';
+    for (let i = 0; i < 12; i++){
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'memory-card';
+      card.id = 'memory-card-' + i;
+      card.addEventListener('click', () => onMemoryCardClick(i));
+      gridEl.appendChild(card);
+    }
+  }
+
+  function onMemoryCardClick(i){
+    if (gameLocked || memoryLocked) return;
+    if (memoryMatched[i] || memoryFlipped.includes(i)) return;
+    const card = document.getElementById('memory-card-' + i);
+    card.innerHTML = `<svg viewBox="0 0 40 40">${MEMORY_ICONS[memoryIcons[i]]}</svg>`;
+    card.classList.add('flipped');
+    memoryFlipped.push(i);
+    if (memoryFlipped.length === 2){
+      memoryLocked = true;
+      const [a, b] = memoryFlipped;
+      if (memoryIcons[a] === memoryIcons[b]){
+        memoryMatched[a] = true; memoryMatched[b] = true;
+        document.getElementById('memory-card-' + a).classList.add('matched');
+        document.getElementById('memory-card-' + b).classList.add('matched');
+        memoryFlipped = [];
+        memoryLocked = false;
+        if (memoryMatched.every(Boolean)){
+          clearInterval(memoryTimerInterval);
+          winGame();
+        }
+      } else {
+        setTimeout(() => {
+          [a, b].forEach(idx => {
+            const c = document.getElementById('memory-card-' + idx);
+            c.classList.remove('flipped');
+            c.innerHTML = '';
+          });
+          memoryFlipped = [];
+          memoryLocked = false;
+        }, 700);
+      }
+    }
+  }
+
+  function startMemoryTimer(){
+    memoryTimeLeft = 60;
+    $('memory-timer-num').textContent = toArabicDigits(memoryTimeLeft);
+    $('memory-timer-ring').style.stroke = 'var(--olive)';
+    $('memory-timer-ring').style.strokeDashoffset = 0;
+    clearInterval(memoryTimerInterval);
+    memoryTimerInterval = setInterval(() => {
+      memoryTimeLeft--;
+      $('memory-timer-num').textContent = toArabicDigits(Math.max(memoryTimeLeft, 0));
+      const offset = RING_CIRC * (1 - memoryTimeLeft / 60);
+      $('memory-timer-ring').style.strokeDashoffset = offset;
+      if (memoryTimeLeft <= 10) $('memory-timer-ring').style.stroke = 'var(--mauve)';
+      if (memoryTimeLeft <= 0){
+        clearInterval(memoryTimerInterval);
+        timesUp();
+      }
+    }, 1000);
+  }
+
   function updateInstructionsText(){
     if (CAFE.game === 'puzzle'){
       $('sheet-line-1').textContent = 'رتّب القطع التسع لتكوين لوحة اليوم الوطني.';
       $('sheet-line-2').textContent = 'اضغط قطعتين لتبديل أماكنهما قبل نفاد الوقت.';
+    } else if (CAFE.game === 'math'){
+      $('sheet-line-1').textContent = 'حل ٥ مسائل حسابية سريعة بالترتيب.';
+      $('sheet-line-2').textContent = 'اضغط الإجابة الصحيحة قبل نفاد الوقت.';
+    } else if (CAFE.game === 'memory'){
+      $('sheet-line-1').textContent = '١٢ بطاقة، ٦ أزواج متطابقة بينها.';
+      $('sheet-line-2').textContent = 'اقلب بطاقتين بكل مرة وطابق بينها قبل نفاد الوقت.';
     } else {
       $('sheet-line-1').textContent = '٣ كلمات قصيرة تقودك إلى الكلمة الرئيسية «وطن».';
       $('sheet-line-2').textContent = 'اضغط حروف كل كلمة بالترتيب الصحيح قبل نفاد الوقت.';
@@ -941,6 +1181,12 @@ button{ font-family:inherit; }
     if (CAFE.game === 'puzzle'){
       resetPuzzle();
       showScreen('screen-puzzle');
+    } else if (CAFE.game === 'math'){
+      resetMath();
+      showScreen('screen-math');
+    } else if (CAFE.game === 'memory'){
+      resetMemory();
+      showScreen('screen-memory');
     } else {
       resetCrossword();
       showScreen('screen-crossword');
@@ -964,6 +1210,10 @@ button{ font-family:inherit; }
     $('sheet-instructions').classList.remove('active');
     if (CAFE.game === 'puzzle'){
       startPuzzleTimer();
+    } else if (CAFE.game === 'math'){
+      startMathTimer();
+    } else if (CAFE.game === 'memory'){
+      startMemoryTimer();
     } else {
       startTimer();
     }
