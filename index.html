@@ -125,13 +125,14 @@ button{ font-family:inherit; }
   cursor:pointer; width:100%; max-width:300px; margin:0 auto;
   transition:transform .3s var(--ease), box-shadow .3s var(--ease);
   box-shadow:0 16px 34px rgba(183,190,95,.22);
+  border-radius:10px;
 }
 .btn-primary:active{ transform:scale(.97); }
 @media (hover:hover){ .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 20px 40px rgba(183,190,95,.32); } }
 .btn-ghost{
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
   background:transparent; color:var(--pearl); font-weight:700; font-size:.95rem;
-  padding:14px 20px; border-radius:99px; border:1.5px solid rgba(234,240,243,.24);
+  padding:14px 20px; border-radius:10px; border:1.5px solid rgba(234,240,243,.24);
   cursor:pointer; width:100%; max-width:300px; margin:14px auto 0;
   transition:background .3s var(--ease), border-color .3s var(--ease);
 }
