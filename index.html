@@ -993,10 +993,20 @@ let puzzleState = [];      // puzzleState[slotIndex] = correctIndex الموجو
     renderPuzzleTile(slotIndex);
     if (prevEl) prevEl.classList.remove('selected');
     puzzleSelected = null;
-    if (puzzleState.every((v, i) => v === i)){
-      clearInterval(puzzleTimerInterval);
-      winGame();
-    }
+
+
+const puzzleSolved = puzzleState.every((piece, position) => {
+  return piece === position;
+});
+
+if (puzzleSolved) {
+  gameLocked = true;
+  clearInterval(puzzleTimerInterval);
+
+  setTimeout(() => {
+    winGame();
+  }, 500);
+}
   }
 
   function startPuzzleTimer(){
