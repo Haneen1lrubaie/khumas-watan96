@@ -280,8 +280,18 @@ button{ font-family:inherit; }
 .memory-card svg{ width:100%; height:100%; display:none; }
 .memory-card.flipped{ background:var(--pearl); border-color:var(--olive); animation:cellPop .3s var(--pop); }
 .memory-card.flipped svg{ display:block; }
-.memory-card.matched{ opacity:.45; cursor:default; }
+.memory-card.matched{   cursor:default; }
 .memory-card:active{ transform:scale(.92); }
+.memory-card.matched {
+  opacity: 1 !important;
+  visibility: visible !important;
+  background: var(--pearl);
+}
+
+.memory-card.matched .memory-card-image {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
 .bank{ display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:auto; }
 .tile{
   width:52px; height:52px; border-radius:14px;
@@ -1117,6 +1127,16 @@ button{ font-family:inherit; }
   'images/memory-5.jpg',
   'images/memory-6.jpg'
 ];
+
+// تحميل صور لعبة الذاكرة مسبقًا
+function preloadMemoryImages() {
+  MEMORY_IMAGES.forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
+}
+
+preloadMemoryImages();
   let memoryIcons = [];
   let memoryMatched = [];
   let memoryFlipped = [];
