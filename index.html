@@ -993,6 +993,7 @@ button{ font-family:inherit; }
   // ================= MATH CHALLENGE =================
   const MATH_TOTAL = 5;
   let mathQuestionIndex = 0;
+  let mathCorrectCount = 0;
   let mathCorrectAnswer = 0;
   let mathTimerInterval = null;
   let mathTimeLeft = 60;
@@ -1039,23 +1040,36 @@ button{ font-family:inherit; }
 
   function onMathAnswer(val, btn){
     if (gameLocked) return;
-    if (val === mathCorrectAnswer){
+    gameLocked = true;
+    const isCorrect = (val === mathCorrectAnswer);
+    if (isCorrect){
+      mathCorrectCount++;
+      btn.style.background = 'var(--olive)';
+      btn.style.color = 'var(--plum-deep)';
+    } else {
+      btn.classList.add('wrong');
+    }
+    document.querySelectorAll('.math-answer-btn').forEach(b => b.disabled = true);
+    setTimeout(() => {
       mathQuestionIndex++;
       if (mathQuestionIndex >= MATH_TOTAL){
         clearInterval(mathTimerInterval);
-        winGame();
+        if (mathCorrectCount === MATH_TOTAL){
+          winGame();
+        } else {
+          timesUp();
+        }
       } else {
+        gameLocked = false;
         generateMathQuestion();
       }
-    } else {
-      btn.classList.add('wrong');
-      setTimeout(() => btn.classList.remove('wrong'), 400);
-    }
+    }, 550);
   }
 
   function resetMath(){
     gameLocked = false;
     mathQuestionIndex = 0;
+    mathCorrectCount = 0;
     generateMathQuestion();
   }
 
@@ -1171,8 +1185,8 @@ button{ font-family:inherit; }
       $('sheet-line-2').textContent = 'اضغط قطعتين لتبديل أماكنهما قبل نفاد الوقت.';
     } else if (CAFE.game === 'math'){
       $('sheet-line-1').textContent = 'حل ٥ مسائل حسابية سريعة بالترتيب.';
-      $('sheet-line-2').textContent = 'اضغط الإجابة الصحيحة قبل نفاد الوقت.';
-    } else if (CAFE.game === 'memory'){
+      $('sheet-line-2').textContent = 'الكوبون يُمنح فقط إذا أجبت على الخمسة صحيحة، وأي إجابة تنهي الوصول للسؤال التالي.';
+        } else if (CAFE.game === 'memory'){
       $('sheet-line-1').textContent = '١٢ بطاقة، ٦ أزواج متطابقة بينها.';
       $('sheet-line-2').textContent = 'اقلب بطاقتين بكل مرة وطابق بينها قبل نفاد الوقت.';
     } else {
