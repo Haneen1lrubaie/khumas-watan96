@@ -972,42 +972,52 @@ let puzzleState = [];      // puzzleState[slotIndex] = correctIndex الموجو
     }
   }
 
-  function onPuzzleTileClick(slotIndex){
-    if (gameLocked) return;
-    const el = document.getElementById('puzzle-tile-' + slotIndex);
-    if (puzzleSelected === null){
-      puzzleSelected = slotIndex;
-      el.classList.add('selected');
-      return;
-    }
-    if (puzzleSelected === slotIndex){
-      el.classList.remove('selected');
-      puzzleSelected = null;
-      return;
-    }
-    const prevEl = document.getElementById('puzzle-tile-' + puzzleSelected);
-    const tmp = puzzleState[puzzleSelected];
-    puzzleState[puzzleSelected] = puzzleState[slotIndex];
-    puzzleState[slotIndex] = tmp;
-    renderPuzzleTile(puzzleSelected);
-    renderPuzzleTile(slotIndex);
-    if (prevEl) prevEl.classList.remove('selected');
-    puzzleSelected = null;
+function onPuzzleTileClick(slotIndex){
+  if (gameLocked) return;
 
+  const el = document.getElementById('puzzle-tile-' + slotIndex);
 
-const puzzleSolved = puzzleState.every((piece, position) => {
-  return piece === position;
-});
-
-if (puzzleSolved) {
-  gameLocked = true;
-  clearInterval(puzzleTimerInterval);
-
-  setTimeout(() => {
-    winGame();
-  }, 500);
-}
+  if (puzzleSelected === null){
+    puzzleSelected = slotIndex;
+    el.classList.add('selected');
+    return;
   }
+
+  if (puzzleSelected === slotIndex){
+    el.classList.remove('selected');
+    puzzleSelected = null;
+    return;
+  }
+
+  const firstIndex = puzzleSelected;
+  const prevEl = document.getElementById('puzzle-tile-' + firstIndex);
+
+  // تبديل القطعتين
+  [puzzleState[firstIndex], puzzleState[slotIndex]] =
+    [puzzleState[slotIndex], puzzleState[firstIndex]];
+
+  renderPuzzleTile(firstIndex);
+  renderPuzzleTile(slotIndex);
+
+  if (prevEl) prevEl.classList.remove('selected');
+  puzzleSelected = null;
+
+  // فحص اكتمال البزل
+  const solved = puzzleState.join(',') === '0,1,2,3,4,5,6,7,8';
+
+  console.log('Puzzle:', puzzleState);
+  console.log('Solved:', solved);
+
+  if (solved){
+    gameLocked = true;
+    clearInterval(puzzleTimerInterval);
+
+    // تأخير بسيط حتى يرى اللاعب الصورة مكتملة
+    setTimeout(() => {
+      winGame();
+    }, 600);
+  }
+}
 
   function startPuzzleTimer(){
     puzzleTimeLeft = 60;
