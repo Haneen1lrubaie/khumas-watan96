@@ -924,135 +924,334 @@ button{ font-family:inherit; }
     renderAdmin();
   });
 
-  // ================= PUZZLE (بزل ثقافي — رسمة أصلية بروح اليوم الوطني) =================
+ // ================= PUZZLE =================
+
+// صورة البزل
 const PUZZLE_IMAGE = 'images/puzzle.jpg';
+
+// تحميل الصورة مسبقًا
 const puzzlePreload = new Image();
 puzzlePreload.src = PUZZLE_IMAGE;
-let puzzleState = [];      // puzzleState[slotIndex] = correctIndex الموجود حاليًا بهذي الخانة
-  let puzzleSelected = null;
-  let puzzleTimerInterval = null;
-  let puzzleTimeLeft = 60;
 
-  function shuffledPuzzleOrder(){
-    let arr = [0,1,2,3,4,5,6,7,8];
-    let solved = true;
-    while (solved){
-      for (let i = arr.length - 1; i > 0; i--){
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      solved = arr.every((v, i) => v === i);
+// متغيرات اللعبة
+let puzzleState = [];
+let puzzleSelected = null;
+let puzzleTimerInterval = null;
+let puzzleTimeLeft = 60;
+
+
+// ================= خلط القطع =================
+
+function shuffledPuzzleOrder() {
+
+  let arr = [0,1,2,3,4,5,6,7,8];
+
+  let solved = true;
+
+  while (solved) {
+
+    for (let i = arr.length - 1; i > 0; i--) {
+
+      const j = Math.floor(Math.random() * (i + 1));
+
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+
     }
-    return arr;
+
+    // نتأكد أن اللعبة لا تبدأ وهي محلولة
+    solved = arr.every((value, index) => value === index);
+
   }
 
-  function renderPuzzleTile(slotIndex){
-    const el = document.getElementById('puzzle-tile-' + slotIndex);
-    if (!el) return;
-    const correctIndex = puzzleState[slotIndex];
-    const col = correctIndex % 3, row = Math.floor(correctIndex / 3);
-    el.style.backgroundImage = `url(${PUZZLE_IMAGE})`;
-    el.style.backgroundPosition = `${col * 50}% ${row * 50}%`;
-    el.classList.toggle('correct', correctIndex === slotIndex);
+  return arr;
+}
+
+
+// ================= رسم قطعة البزل =================
+
+function renderPuzzleTile(slotIndex) {
+
+  const el = document.getElementById(
+    'puzzle-tile-' + slotIndex
+  );
+
+  if (!el) return;
+
+  // رقم القطعة الموجودة حاليًا في هذه الخانة
+  const pieceIndex = puzzleState[slotIndex];
+
+  const col = pieceIndex % 3;
+  const row = Math.floor(pieceIndex / 3);
+
+  // الصورة
+  el.style.backgroundImage =
+    `url("${PUZZLE_IMAGE}")`;
+
+  // تقسيم الصورة 3 × 3
+  el.style.backgroundSize = '300% 300%';
+
+  // تحديد الجزء الذي يظهر من الصورة
+  el.style.backgroundPosition =
+    `${col * 50}% ${row * 50}%`;
+
+  // تحديد هل القطعة في مكانها الصحيح
+  el.classList.toggle(
+    'correct',
+    pieceIndex === slotIndex
+  );
+}
+
+
+// ================= إعادة تشغيل البزل =================
+
+function resetPuzzle() {
+
+  puzzleSelected = null;
+
+  gameLocked = false;
+
+  // إنشاء ترتيب عشوائي
+  puzzleState = shuffledPuzzleOrder();
+
+  const gridEl = $('puzzle-grid');
+
+  gridEl.innerHTML = '';
+
+  // إنشاء 9 قطع
+  for (let i = 0; i < 9; i++) {
+
+    const tile = document.createElement('div');
+
+    tile.className = 'puzzle-tile';
+
+    tile.id = 'puzzle-tile-' + i;
+
+    tile.addEventListener(
+      'click',
+      () => onPuzzleTileClick(i)
+    );
+
+    gridEl.appendChild(tile);
+
+    renderPuzzleTile(i);
+
   }
 
-  function resetPuzzle(){
-    puzzleSelected = null;
-    gameLocked = false;
-    puzzleState = shuffledPuzzleOrder();
-    const gridEl = $('puzzle-grid');
-    gridEl.innerHTML = '';
-    for (let i = 0; i < 9; i++){
-      const tile = document.createElement('div');
-      tile.className = 'puzzle-tile';
-      tile.id = 'puzzle-tile-' + i;
-      tile.addEventListener('click', () => onPuzzleTileClick(i));
-      gridEl.appendChild(tile);
-      renderPuzzleTile(i);
-    }
-  }
+}
+
+
+// ================= الضغط على قطع البزل =================
 
 function onPuzzleTileClick(slotIndex) {
+
+  // منع اللعب بعد انتهاء اللعبة
   if (gameLocked) return;
 
-  const el = document.getElementById('puzzle-tile-' + slotIndex);
+  const el = document.getElementById(
+    'puzzle-tile-' + slotIndex
+  );
 
-  // اختيار أول قطعة
+
+  // ================= اختيار القطعة الأولى =================
+
   if (puzzleSelected === null) {
+
     puzzleSelected = slotIndex;
+
     el.classList.add('selected');
+
     return;
+
   }
 
-  // إلغاء الاختيار
+
+  // ================= الضغط على نفس القطعة =================
+
   if (puzzleSelected === slotIndex) {
+
     el.classList.remove('selected');
+
     puzzleSelected = null;
+
     return;
+
   }
+
+
+  // ================= القطعة الثانية =================
 
   const firstIndex = puzzleSelected;
-  const firstEl = document.getElementById('puzzle-tile-' + firstIndex);
 
-  // تبديل القطعتين
+  const firstEl = document.getElementById(
+    'puzzle-tile-' + firstIndex
+  );
+
+
+  // ================= تبديل القطعتين =================
+
   const temp = puzzleState[firstIndex];
-  puzzleState[firstIndex] = puzzleState[slotIndex];
-  puzzleState[slotIndex] = temp;
 
-  // إعادة رسم القطعتين
+  puzzleState[firstIndex] =
+    puzzleState[slotIndex];
+
+  puzzleState[slotIndex] =
+    temp;
+
+
+  // ================= إعادة رسم القطعتين =================
+
   renderPuzzleTile(firstIndex);
+
   renderPuzzleTile(slotIndex);
 
+
+  // إزالة إطار الاختيار
   if (firstEl) {
+
     firstEl.classList.remove('selected');
+
   }
 
   puzzleSelected = null;
 
-  // ===== فحص الفوز =====
-  const correctTiles = document.querySelectorAll(
-    '#puzzle-grid .puzzle-tile.correct'
-  ).length;
 
-  console.log('عدد القطع الصحيحة:', correctTiles);
-  console.log('ترتيب البزل:', puzzleState);
+  // ==================================================
+  // فحص الفوز
+  // ==================================================
 
-  // إذا كانت كل القطع التسع صحيحة
-  if (correctTiles === 9) {
+  const puzzleSolved =
+    puzzleState.every(
+      (piece, position) => piece === position
+    );
+
+
+  // للمساعدة في الاختبار
+  console.log(
+    'PUZZLE STATE:',
+    puzzleState
+  );
+
+  console.log(
+    'SOLVED:',
+    puzzleSolved
+  );
+
+
+  // ================= الفوز =================
+
+  if (puzzleSolved) {
+
+    // منع أي ضغط إضافي
     gameLocked = true;
 
-    clearInterval(puzzleTimerInterval);
+    // إيقاف المؤقت
+    clearInterval(
+      puzzleTimerInterval
+    );
 
+    // إزالة أي تحديد متبقٍ
     document
-      .querySelectorAll('#puzzle-grid .puzzle-tile')
+      .querySelectorAll(
+        '#puzzle-grid .puzzle-tile'
+      )
       .forEach(tile => {
-        tile.classList.remove('selected');
+
+        tile.classList.remove(
+          'selected'
+        );
+
       });
 
+
+    // إعطاء اللاعب لحظة لرؤية الصورة مكتملة
     setTimeout(() => {
+
       winGame();
+
     }, 500);
+
   }
+
 }
 
-  function startPuzzleTimer(){
-    puzzleTimeLeft = 60;
-    $('puzzle-timer-num').textContent = toArabicDigits(puzzleTimeLeft);
-    $('puzzle-timer-ring').style.stroke = 'var(--olive)';
-    $('puzzle-timer-ring').style.strokeDashoffset = 0;
-    clearInterval(puzzleTimerInterval);
-    puzzleTimerInterval = setInterval(() => {
+
+// ================= مؤقت البزل =================
+
+function startPuzzleTimer() {
+
+  puzzleTimeLeft = 60;
+
+  $('puzzle-timer-num').textContent =
+    toArabicDigits(
+      puzzleTimeLeft
+    );
+
+  $('puzzle-timer-ring').style.stroke =
+    'var(--olive)';
+
+  $('puzzle-timer-ring').style.strokeDashoffset =
+    0;
+
+
+  // إلغاء أي مؤقت سابق
+  clearInterval(
+    puzzleTimerInterval
+  );
+
+
+  puzzleTimerInterval =
+    setInterval(() => {
+
       puzzleTimeLeft--;
-      $('puzzle-timer-num').textContent = toArabicDigits(Math.max(puzzleTimeLeft, 0));
-      const offset = RING_CIRC * (1 - puzzleTimeLeft / 60);
-      $('puzzle-timer-ring').style.strokeDashoffset = offset;
-      if (puzzleTimeLeft <= 10) $('puzzle-timer-ring').style.stroke = 'var(--mauve)';
-      if (puzzleTimeLeft <= 0){
-        clearInterval(puzzleTimerInterval);
-        timesUp();
+
+
+      $('puzzle-timer-num').textContent =
+        toArabicDigits(
+          Math.max(
+            puzzleTimeLeft,
+            0
+          )
+        );
+
+
+      const offset =
+        RING_CIRC *
+        (
+          1 -
+          puzzleTimeLeft / 60
+        );
+
+
+      $('puzzle-timer-ring').style.strokeDashoffset =
+        offset;
+
+
+      // تغيير لون المؤقت آخر 10 ثوانٍ
+      if (puzzleTimeLeft <= 10) {
+
+        $('puzzle-timer-ring').style.stroke =
+          'var(--mauve)';
+
       }
+
+
+      // ================= انتهاء الوقت =================
+
+      if (puzzleTimeLeft <= 0) {
+
+        clearInterval(
+          puzzleTimerInterval
+        );
+
+        gameLocked = true;
+
+        timesUp();
+
+      }
+
     }, 1000);
-  }
+
+}
 
   // ================= MATH CHALLENGE =================
   const MATH_TOTAL = 5;
