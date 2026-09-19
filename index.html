@@ -972,50 +972,66 @@ let puzzleState = [];      // puzzleState[slotIndex] = correctIndex الموجو
     }
   }
 
-function onPuzzleTileClick(slotIndex){
+function onPuzzleTileClick(slotIndex) {
   if (gameLocked) return;
 
   const el = document.getElementById('puzzle-tile-' + slotIndex);
 
-  if (puzzleSelected === null){
+  // اختيار أول قطعة
+  if (puzzleSelected === null) {
     puzzleSelected = slotIndex;
     el.classList.add('selected');
     return;
   }
 
-  if (puzzleSelected === slotIndex){
+  // إلغاء الاختيار
+  if (puzzleSelected === slotIndex) {
     el.classList.remove('selected');
     puzzleSelected = null;
     return;
   }
 
   const firstIndex = puzzleSelected;
-  const prevEl = document.getElementById('puzzle-tile-' + firstIndex);
+  const firstEl = document.getElementById('puzzle-tile-' + firstIndex);
 
   // تبديل القطعتين
-  [puzzleState[firstIndex], puzzleState[slotIndex]] =
-    [puzzleState[slotIndex], puzzleState[firstIndex]];
+  const temp = puzzleState[firstIndex];
+  puzzleState[firstIndex] = puzzleState[slotIndex];
+  puzzleState[slotIndex] = temp;
 
+  // إعادة رسم القطعتين
   renderPuzzleTile(firstIndex);
   renderPuzzleTile(slotIndex);
 
-  if (prevEl) prevEl.classList.remove('selected');
+  if (firstEl) {
+    firstEl.classList.remove('selected');
+  }
+
   puzzleSelected = null;
 
-  // فحص اكتمال البزل
-  const solved = puzzleState.join(',') === '0,1,2,3,4,5,6,7,8';
+  // ===== فحص الفوز =====
+  const correctTiles = document.querySelectorAll(
+    '#puzzle-grid .puzzle-tile.correct'
+  ).length;
 
-  console.log('Puzzle:', puzzleState);
-  console.log('Solved:', solved);
+  console.log('عدد القطع الصحيحة:', correctTiles);
+  console.log('ترتيب البزل:', puzzleState);
 
-  if (solved){
+  // إذا كانت كل القطع التسع صحيحة
+  if (correctTiles === 9) {
     gameLocked = true;
+
     clearInterval(puzzleTimerInterval);
 
-    // تأخير بسيط حتى يرى اللاعب الصورة مكتملة
+    document
+      .querySelectorAll('#puzzle-grid .puzzle-tile')
+      .forEach(tile => {
+        tile.classList.remove('selected');
+      });
+
     setTimeout(() => {
       winGame();
-    }, 600);
+    }, 500);
   }
 }
 
