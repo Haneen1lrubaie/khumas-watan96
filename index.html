@@ -358,7 +358,7 @@ button{ font-family:inherit; }
 .timesup-title{ font-family:'Zain'; font-size:clamp(1.5rem,7vw,2.1rem); margin:0 0 10px; }
 .timesup-sub{ font-size:.98rem; color:rgba(234,240,243,.68); margin:0 0 6px; line-height:1.8; }
 .timesup-sub2{ font-size:.98rem; color:rgba(234,240,243,.88); font-weight:700; margin:0 0 30px; }
-
+.timesup-score{ font-family:'Zain'; font-size:1.15rem; font-weight:700; color:var(--olive); margin:0 0 14px; }
 /* ================= CLAIM MODAL ================= */
 .claim-field{ text-align:right; margin-bottom:14px; }
 .claim-field label{ display:block; font-size:.78rem; color:rgba(43,26,50,.6); margin-bottom:6px; font-weight:700; }
@@ -552,6 +552,7 @@ button{ font-family:inherit; }
     <div class="timesup-emoji"></div>
     <h2 class="timesup-title">حظًا أوفر</h2>
     <p class="timesup-sub">انتهى التحدي... لكن فرصتك ما انتهت!</p>
+    <p class="timesup-score" id="timesup-score" style="display:none;"></p>
     <p class="timesup-sub2">٩٦ هدية تنتظرك احتفالًا باليوم الوطني الـ٩٦</p>
     <button class="btn-primary" id="btn-to-gifts-timesup">اكتشف الـ٩٦ هدية </button>
   </section>
@@ -805,9 +806,16 @@ button{ font-family:inherit; }
   }
   const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-  function timesUp(){
+  function timesUp(scoreText){
     gameLocked = true;
     $('topbar').style.display = 'flex';
+    const scoreEl = $('timesup-score');
+    if (scoreText){
+      scoreEl.textContent = scoreText;
+      scoreEl.style.display = 'block';
+    } else {
+      scoreEl.style.display = 'none';
+    }
     showScreen('screen-timesup');
   }
 
@@ -1054,10 +1062,10 @@ button{ font-family:inherit; }
       mathQuestionIndex++;
       if (mathQuestionIndex >= MATH_TOTAL){
         clearInterval(mathTimerInterval);
-        if (mathCorrectCount === MATH_TOTAL){
+    if (mathCorrectCount === MATH_TOTAL){
           winGame();
         } else {
-          timesUp();
+          timesUp(`جاوبت ${toArabicDigits(mathCorrectCount)} من ${toArabicDigits(MATH_TOTAL)} صح`);
         }
       } else {
         gameLocked = false;
@@ -1087,7 +1095,7 @@ button{ font-family:inherit; }
       if (mathTimeLeft <= 10) $('math-timer-ring').style.stroke = 'var(--mauve)';
       if (mathTimeLeft <= 0){
         clearInterval(mathTimerInterval);
-        timesUp();
+        timesUp(`جاوبت ${toArabicDigits(mathCorrectCount)} من ${toArabicDigits(MATH_TOTAL)} صح`);
       }
     }, 1000);
   }
