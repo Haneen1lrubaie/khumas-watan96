@@ -929,7 +929,7 @@ button{ font-family:inherit; }
     clearInterval(timerInterval);
     document.querySelectorAll('.cell.core').forEach(c => c.classList.add('core-reveal'));
     await wait(650);
-    $('topbar').style.display = 'flex';
+    $('topbar').style.display = 'grid';
     showScreen('screen-win');
     const result = await claimCoupon();
     $('coupon').style.display = 'none';
@@ -949,7 +949,7 @@ button{ font-family:inherit; }
 
   function timesUp(scoreText){
     gameLocked = true;
-    $('topbar').style.display = 'flex';
+    $('topbar').style.display = 'grid';
     const scoreEl = $('timesup-score');
     if (scoreText){
       scoreEl.textContent = scoreText;
@@ -1444,7 +1444,7 @@ button{ font-family:inherit; }
   } else {
     loadCafe().then(async () => {
       if (!CAFE.active){
-        $('topbar').style.display = 'flex';
+        $('topbar').style.display = 'grid';
         showScreen('screen-inactive');
         return;
       }
