@@ -100,12 +100,12 @@ button{ font-family:inherit; }
     radial-gradient(1px 1px at 85% 52%,     rgba(242,236,220,.4), transparent 60%);
 }
 
-/* خلفية بشكل خريطة المملكة العربية السعودية — زخرفة خفيفة وصغيرة خلف المحتوى */
+ /* خلفية بشكل خريطة المملكة العربية السعودية — زخرفة خفيفة خلف المحتوى */
 .ksa-bg-motif{
   position:absolute; top:50%; left:50%; z-index:0; pointer-events:none;
-  width:38%; max-width:200px; height:auto;
+  width:62%; max-width:300px; height:auto;
   transform:translate(-50%,-50%);
-  opacity:.07;
+  opacity:.12;
 }
 
 /* زخرفة زوايا سادو — النقش الحقيقي من ملف الهوية البصرية */
@@ -128,11 +128,10 @@ button{ font-family:inherit; }
   padding:20px clamp(16px,5vw,26px) 4px;
 }
 .topbar-side{ display:flex; align-items:center; gap:12px; }
-.topbar-side.topbar-left{ justify-content:flex-start; }
-.topbar-side.topbar-right{ justify-content:flex-end; }
+.topbar-side.topbar-left{ justify-content:flex-end; }
+.topbar-side.topbar-right{ justify-content:flex-start; }
 .topbar-side img{ height:20px; width:auto; opacity:.95; }
 .topbar-side .cafe-logo{ display:none; height:34px; max-width:110px; }
-.topbar-side .sep{ width:1px; height:18px; background:rgba(242,236,220,.25); }
 
 .day-badge{ text-align:center; line-height:1.35; justify-self:center; }
 .day-badge-logo{ display:block; height:80px; width:auto; margin:0 auto; }
@@ -447,8 +446,7 @@ button{ font-family:inherit; }
 
 <div id="stage">
   <div class="stars" aria-hidden="true"></div>
-  <svg class="ksa-bg-motif" viewBox="0 0 700 526.2" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <path fill="none" stroke="var(--cream)" stroke-width="1.4" d="M271.1,526.2 L254.2,488.7 L237.0,476.8 L219.3,448.9 L209.9,421.8 L186.9,398.9 L172.0,393.4 L150.0,361.7 L147.6,318.9 L128.5,282.0 L94.9,262.1 L76.5,218.2 L16.6,136.4 L0.0,136.5 L10.8,93.3 L47.8,98.6 L70.2,76.4 L95.6,71.8 L112.0,55.0 L78.9,21.7 L151.9,0.0 L191.9,9.0 L241.5,32.3 L335.4,99.2 L426.9,105.1 L435.2,121.0 L458.7,120.1 L471.7,148.8 L516.5,182.1 L519.4,218.1 L538.4,246.5 L548.4,253.1 L557.7,250.7 L578.0,304.8 L678.0,321.6 L684.7,314.6 L700.0,338.1 L677.8,404.7 L578.0,438.0 L482.0,450.7 L451.0,465.7 L427.1,500.7 L411.6,506.2 L403.3,495.1 L352.2,490.1 L304.8,493.9 L291.1,485.2 L282.3,501.6 L285.7,515.6 L271.1,526.2 Z"/>
+<svg class="ksa-bg-motif" viewBox="0 0 700 526.2" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">    <path fill="none" stroke="var(--cream)" stroke-width="1.4" d="M271.1,526.2 L254.2,488.7 L237.0,476.8 L219.3,448.9 L209.9,421.8 L186.9,398.9 L172.0,393.4 L150.0,361.7 L147.6,318.9 L128.5,282.0 L94.9,262.1 L76.5,218.2 L16.6,136.4 L0.0,136.5 L10.8,93.3 L47.8,98.6 L70.2,76.4 L95.6,71.8 L112.0,55.0 L78.9,21.7 L151.9,0.0 L191.9,9.0 L241.5,32.3 L335.4,99.2 L426.9,105.1 L435.2,121.0 L458.7,120.1 L471.7,148.8 L516.5,182.1 L519.4,218.1 L538.4,246.5 L548.4,253.1 L557.7,250.7 L578.0,304.8 L678.0,321.6 L684.7,314.6 L700.0,338.1 L677.8,404.7 L578.0,438.0 L482.0,450.7 L451.0,465.7 L427.1,500.7 L411.6,506.2 L403.3,495.1 L352.2,490.1 L304.8,493.9 L291.1,485.2 L282.3,501.6 L285.7,515.6 L271.1,526.2 Z"/>
   </svg>
 
 <div class="topbar" id="topbar">
@@ -459,7 +457,6 @@ button{ font-family:inherit; }
       <img class="day-badge-logo" src="images/ezzona-logo.png" alt="عزّنا بطبعنا">
      </div>
     <div class="topbar-side topbar-left">
-      <span class="sep" id="topbar-sep" style="display:none;"></span>
       <img id="topbar-cafe-logo" class="cafe-logo" src="" alt="">
     </div>
   </div>
@@ -912,14 +909,12 @@ button{ font-family:inherit; }
     $('coupon-brand').textContent = CAFE.name;
     $('coupon-value').textContent = CAFE.discount;
     $('coupon-desc').textContent = `على طلبك القادم من ${CAFE.name}، احتفالًا بفوزك في التحدي`;
-    if (CAFE.logo){
+     if (CAFE.logo){
       $('topbar-cafe-logo').src = CAFE.logo;
       $('topbar-cafe-logo').alt = CAFE.name;
       $('topbar-cafe-logo').style.display = 'block';
-      $('topbar-sep').style.display = 'block';
     } else {
       $('topbar-cafe-logo').style.display = 'none';
-      $('topbar-sep').style.display = 'none';
     }
     renderCafeFooter();
   }
