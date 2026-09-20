@@ -125,7 +125,7 @@ button{ font-family:inherit; }
 .topbar-logos .sep{ width:1px; height:18px; background:rgba(242,236,220,.25); }
 
 .day-badge{ text-align:center; line-height:1.35; }
-.day-badge-logo{ display:block; height:80px; width:auto; margin:0 auto 8px; }
+.day-badge-logo{ display:block; height:80px; width:auto; margin:0 auto; }
 .day-badge .l2{ font-size:.68rem; color:var(--cream-dim); margin-top:1px; }
 .day-badge .l3{ font-size:.52rem; letter-spacing:.14em; color:var(--glow); margin-top:2px; font-weight:700; }
 
@@ -321,6 +321,20 @@ button{ font-family:inherit; }
 .tile:active{ transform:scale(.9); }
 .tile.wrong{ animation:shake .4s; border-color:var(--danger) !important; }
 @keyframes shake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)} }
+
+/* ===== تأثير إجابة صح/غلط بلون الهوية — أخضر التوهّج / أحمر التنبيه ===== */
+@keyframes flashCorrect{
+  0%{ box-shadow:0 0 0 0 rgba(63,192,136,.55); }
+  60%{ box-shadow:0 0 0 10px rgba(63,192,136,0); }
+  100%{ box-shadow:0 0 0 0 rgba(63,192,136,0); }
+}
+@keyframes flashWrong{
+  0%{ box-shadow:0 0 0 0 rgba(201,122,90,.55); }
+  60%{ box-shadow:0 0 0 10px rgba(201,122,90,0); }
+  100%{ box-shadow:0 0 0 0 rgba(201,122,90,0); }
+}
+.flash-correct{ background:rgba(63,192,136,.22) !important; border-color:var(--glow) !important; animation:flashCorrect .5s var(--ease); }
+.flash-wrong{ background:rgba(201,122,90,.2) !important; border-color:var(--danger) !important; animation:flashWrong .5s var(--ease); }
 .tile.used{ opacity:0; pointer-events:none; transform:scale(.4); }
 
 /* ================= WIN / COUPON ================= */
@@ -388,7 +402,7 @@ button{ font-family:inherit; }
 .sheet .claim-field input{ border-color:rgba(10,26,22,.16); background:rgba(10,26,22,.04); color:var(--sky-3); }
 .sheet .claim-field input:focus{ border-color:var(--glow); background:#fff; }
 
-/* ================= FOOTER — خماس يمين ثابت / حسابات المقهى يسار ديناميكية ================= */
+/* ================= FOOTER — خماس يمين (ثابت) / حسابات المقهى يسار (ديناميكية) ================= */
 .site-footer{
   position:relative; z-index:2;
   display:flex; direction:ltr; align-items:center; justify-content:space-between;
@@ -399,6 +413,8 @@ button{ font-family:inherit; }
 }
 .footer-block{ display:flex; align-items:center; gap:8px; direction:rtl; }
 .footer-name{ font-size:.74rem; color:var(--cream-dim); font-weight:700; white-space:nowrap; }
+.footer-logo{ height:18px; width:auto; display:block; opacity:.95; }
+.footer-cafe-logo{ height:18px; width:auto; display:none; opacity:.95; }
 .footer-icons{ display:flex; gap:7px; }
 .footer-icons a{
   width:25px; height:25px; border-radius:50%; flex-shrink:0;
@@ -408,7 +424,7 @@ button{ font-family:inherit; }
   transition:background .25s var(--ease), border-color .25s var(--ease), transform .25s var(--ease);
 }
 .footer-icons a:hover{ background:var(--glow); border-color:var(--glow); color:var(--sky-3); transform:translateY(-2px); }
-.footer-icons a svg{ width:12px; height:12px; fill:currentColor; }
+.footer-icons a svg{ width:12px; height:12px; }
 
 @media (prefers-reduced-motion:reduce){
   *{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
@@ -572,18 +588,16 @@ button{ font-family:inherit; }
     </div>
 
     <div class="soldout-card" id="soldout-card">
-      <div class="icon">✦</div>
-      <p>وصلنا للعدد الكامل من كوبونات اليوم، لكن احتفالك يستمر معنا!</p>
+       <p>وصلنا للعدد الكامل من كوبونات اليوم، لكن احتفالك يستمر معنا!</p>
     </div>
 
     <div class="soldout-card" id="alreadyhas-card">
-      <div class="icon">✦</div>
-      <p>عرفتها! لكن يبدو إنك سبق واستلمت كوبونك من قبل — يسمح بكوبون واحد فقط لكل شخص.</p>
+       <p>عرفتها! لكن يبدو إنك سبق واستلمت كوبونك من قبل — يسمح بكوبون واحد فقط لكل شخص.</p>
     </div>
 
     <p class="next-line" id="win-next-line">وهذي مو كل المفاجآت...</p>
     <h3 class="next-title">٩٦ هدية تنتظرك احتفالًا<br>باليوم الوطني الـ٩٦</h3>
-    <button class="btn-primary" id="btn-to-gifts-win"><span class="chev">‹</span> اكتشف الـ٩٦ هدية</button>
+    <button class="btn-primary" id="btn-to-gifts-win">  اكتشف الـ٩٦ هدية</button>
   </section>
 
   <!-- ===================== TIME'S UP ===================== -->
@@ -642,19 +656,27 @@ button{ font-family:inherit; }
     <div class="footer-block" id="footer-cafe">
       <div class="footer-icons" id="footer-cafe-icons"></div>
       <span class="footer-name" id="footer-cafe-name-label">تابعونا</span>
+      <img class="footer-cafe-logo" id="footer-cafe-logo" src="" alt="">
     </div>
 
     <div class="footer-block">
-      <span class="footer-name">خماس</span>
+      <img class="footer-logo" src="images/khumas-logo2.png" alt="خماس">
       <div class="footer-icons">
         <a href="https://x.com/khumas_sa" target="_blank" rel="noopener" aria-label="X">
-          <svg viewBox="0 0 24 24"><path d="M3 3l7.5 9.6L3 21h2.6l6.1-6.9 4.9 6.9H21l-7.8-10L20.5 3h-2.6l-5.6 6.4L7.7 3H3z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3l7.5 9.6L3 21h2.6l6.1-6.9 4.9 6.9H21l-7.8-10L20.5 3h-2.6l-5.6 6.4L7.7 3H3z"/></svg>
         </a>
         <a href="https://www.linkedin.com/company/khumas" target="_blank" rel="noopener" aria-label="LinkedIn">
-          <svg viewBox="0 0 24 24"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5a2.5 2.5 0 0 1-.02-5zM3.5 9.75h3v10.75h-3V9.75zm6 0h2.88v1.47h.04c.4-.76 1.38-1.56 2.84-1.56 3.03 0 3.6 2 3.6 4.6v6.24h-3v-5.53c0-1.32-.02-3.02-1.84-3.02-1.84 0-2.12 1.44-2.12 2.92v5.63h-3V9.75z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5a2.5 2.5 0 0 1-.02-5zM3.5 9.75h3v10.75h-3V9.75zm6 0h2.88v1.47h.04c.4-.76 1.38-1.56 2.84-1.56 3.03 0 3.6 2 3.6 4.6v6.24h-3v-5.53c0-1.32-.02-3.02-1.84-3.02-1.84 0-2.12 1.44-2.12 2.92v5.63h-3V9.75z"/></svg>
+        </a>
+        <a href="https://instagram.com/khumas_sa" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
         </a>
         <a href="https://wa.me/966500000000" target="_blank" rel="noopener" aria-label="WhatsApp">
-          <svg viewBox="0 0 24 24"><path d="M17 14.2c-.3-.15-1.7-.85-2-.95-.27-.1-.46-.15-.66.15-.2.3-.75.95-.92 1.15-.17.2-.34.22-.63.07-.3-.15-1.24-.46-2.36-1.46-.87-.78-1.46-1.74-1.63-2.03-.17-.3-.02-.46.13-.6.13-.13.3-.34.44-.5.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.66-1.6-.9-2.2-.24-.57-.48-.5-.66-.5h-.56c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.5 0 1.46 1.07 2.87 1.22 3.07.15.2 2.1 3.2 5.08 4.5.71.3 1.26.48 1.7.62.71.22 1.36.19 1.87.12.57-.09 1.7-.7 1.94-1.37.24-.68.24-1.26.17-1.38-.07-.13-.27-.2-.57-.35z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.85-1.47A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.13-.43-4.46-1.24l-.32-.2-2.85.86.87-2.78-.21-.33A8.2 8.2 0 1 1 12 20.2z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 14.2c-.3-.15-1.7-.85-2-.95-.27-.1-.46-.15-.66.15-.2.3-.75.95-.92 1.15-.17.2-.34.22-.63.07-.3-.15-1.24-.46-2.36-1.46-.87-.78-1.46-1.74-1.63-2.03-.17-.3-.02-.46.13-.6.13-.13.3-.34.44-.5.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.66-1.6-.9-2.2-.24-.57-.48-.5-.66-.5h-.56c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.5 0 1.46 1.07 2.87 1.22 3.07.15.2 2.1 3.2 5.08 4.5.71.3 1.26.48 1.7.62.71.22 1.36.19 1.87.12.57-.09 1.7-.7 1.94-1.37.24-.68.24-1.26.17-1.38-.07-.13-.27-.2-.57-.35z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.85-1.47A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.13-.43-4.46-1.24l-.32-.2-2.85.86.87-2.78-.21-.33A8.2 8.2 0 1 1 12 20.2z"/></svg>
         </a>
       </div>
     </div>
@@ -724,14 +746,15 @@ button{ font-family:inherit; }
           cell.textContent = letter;
           cell.classList.add('filled','row-active','pop');
           setTimeout(() => cell.classList.remove('pop'), 400);
+          btn.classList.add('flash-correct');
           btn.classList.add('used');
           nextIndex++;
           if (nextIndex === row.answer.length) {
             rowSolved(rowIndex);
           }
         } else {
-          btn.classList.add('wrong');
-          setTimeout(() => btn.classList.remove('wrong'), 400);
+          btn.classList.add('wrong','flash-wrong');
+          setTimeout(() => btn.classList.remove('wrong','flash-wrong'), 400);
         }
       });
       bankEl.appendChild(btn);
@@ -822,13 +845,14 @@ button{ font-family:inherit; }
   function renderCafeFooter(){
     const wrap = $('footer-cafe-icons');
     const label = $('footer-cafe-name-label');
-    if (!wrap || !label) return;
+    const logoImg = $('footer-cafe-logo');
+    if (!wrap) return;
     wrap.innerHTML = '';
     const icons = {
-      tiktok:'<svg viewBox="0 0 24 24"><path d="M16.6 3c.4 2 1.7 3.6 4.2 4v3c-1.5 0-2.9-.4-4.2-1.2v6.4a6.4 6.4 0 1 1-6.4-6.4c.3 0 .6 0 1 .1v3.1a3.3 3.3 0 1 0 2.3 3.2V3h3.1z"/></svg>',
-      x:'<svg viewBox="0 0 24 24"><path d="M3 3l7.5 9.6L3 21h2.6l6.1-6.9 4.9 6.9H21l-7.8-10L20.5 3h-2.6l-5.6 6.4L7.7 3H3z"/></svg>',
-      instagram:'<svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.2.06 2 .25 2.7.53a5.4 5.4 0 0 1 2 1.3 5.4 5.4 0 0 1 1.3 2c.28.7.47 1.5.53 2.7.06 1.3.07 1.7.07 4.9s0 3.6-.07 4.9c-.06 1.2-.25 2-.53 2.7a5.4 5.4 0 0 1-1.3 2 5.4 5.4 0 0 1-2 1.3c-.7.28-1.5.47-2.7.53-1.3.06-1.7.07-4.9.07s-3.6 0-4.9-.07c-1.2-.06-2-.25-2.7-.53a5.4 5.4 0 0 1-2-1.3 5.4 5.4 0 0 1-1.3-2c-.28-.7-.47-1.5-.53-2.7C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.9c.06-1.2.25-2 .53-2.7a5.4 5.4 0 0 1 1.3-2 5.4 5.4 0 0 1 2-1.3c.7-.28 1.5-.47 2.7-.53C8.4 2.2 8.8 2.2 12 2.2z"/></svg>',
-      snapchat:'<svg viewBox="0 0 24 24"><path d="M12 2c3 0 4.6 2.2 4.7 4.4l.06 1.9c0 .2.1.3.5.4.4.1 1.3-.2 1.7.6.3.6-.1 1-.7 1.3-.1.05-.5.2-.5.5s.5.9 1.6 1.4c.2.1.6.2.5.6-.1.5-1 .7-1.4.8-.2.05-.3.2-.3.4-.05.2 0 .5-.2.7-.3.3-1 .2-1.5.3-.4.1-.6.4-1.2.9-.5.4-1.2.9-2.2.9s-1.7-.5-2.2-.9c-.6-.5-.8-.8-1.2-.9-.5-.1-1.2 0-1.5-.3-.2-.2-.15-.5-.2-.7 0-.2-.1-.35-.3-.4-.4-.1-1.3-.3-1.4-.8-.1-.4.3-.5.5-.6 1.1-.5 1.6-1.1 1.6-1.4s-.4-.45-.5-.5c-.6-.3-1-.7-.7-1.3.4-.8 1.3-.5 1.7-.6.4-.1.5-.2.5-.4l.06-1.9C7.4 4.2 9 2 12 2z"/></svg>'
+      tiktok:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 3c.4 2 1.7 3.6 4.2 4v3c-1.5 0-2.9-.4-4.2-1.2v6.4a6.4 6.4 0 1 1-6.4-6.4c.3 0 .6 0 1 .1v3.1a3.3 3.3 0 1 0 2.3 3.2V3h3.1z"/></svg>',
+      x:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3l7.5 9.6L3 21h2.6l6.1-6.9 4.9 6.9H21l-7.8-10L20.5 3h-2.6l-5.6 6.4L7.7 3H3z"/></svg>',
+      instagram:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>',
+      snapchat:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c3 0 4.6 2.2 4.7 4.4l.06 1.9c0 .2.1.3.5.4.4.1 1.3-.2 1.7.6.3.6-.1 1-.7 1.3-.1.05-.5.2-.5.5s.5.9 1.6 1.4c.2.1.6.2.5.6-.1.5-1 .7-1.4.8-.2.05-.3.2-.3.4-.05.2 0 .5-.2.7-.3.3-1 .2-1.5.3-.4.1-.6.4-1.2.9-.5.4-1.2.9-2.2.9s-1.7-.5-2.2-.9c-.6-.5-.8-.8-1.2-.9-.5-.1-1.2 0-1.5-.3-.2-.2-.15-.5-.2-.7 0-.2-.1-.35-.3-.4-.4-.1-1.3-.3-1.4-.8-.1-.4.3-.5.5-.6 1.1-.5 1.6-1.1 1.6-1.4s-.4-.45-.5-.5c-.6-.3-1-.7-.7-1.3.4-.8 1.3-.5 1.7-.6.4-.1.5-.2.5-.4l.06-1.9C7.4 4.2 9 2 12 2z"/></svg>'
     };
     Object.keys(icons).forEach(key => {
       if (CAFE.socials && CAFE.socials[key]){
@@ -840,7 +864,16 @@ button{ font-family:inherit; }
         wrap.appendChild(a);
       }
     });
-    label.textContent = CAFE.name || 'تابعونا';
+    // لو المقهى عنده لوقو من Airtable، نعرض صورته بدل اسمه نصًا بالفوتر
+    if (CAFE.logo && logoImg){
+      logoImg.src = CAFE.logo;
+      logoImg.alt = CAFE.name || '';
+      logoImg.style.display = 'block';
+      if (label) label.style.display = 'none';
+    } else {
+      if (logoImg) logoImg.style.display = 'none';
+      if (label){ label.style.display = 'block'; label.textContent = CAFE.name || 'تابعونا'; }
+    }
   }
 
   function applyCafeTheme(){
@@ -1076,7 +1109,7 @@ button{ font-family:inherit; }
     if (puzzleSolved) {
       gameLocked = true;
       clearInterval(puzzleTimerInterval);
-      document.querySelectorAll('#puzzle-grid .puzzle-tile').forEach(tile => { tile.classList.remove('selected'); });
+      document.querySelectorAll('#puzzle-grid .puzzle-tile').forEach(tile => { tile.classList.remove('selected'); tile.classList.add('flash-correct'); });
       setTimeout(() => { winGame(); }, 500);
     }
   }
@@ -1155,9 +1188,9 @@ button{ font-family:inherit; }
     const isCorrect = (val === mathCorrectAnswer);
     if (isCorrect){
       mathCorrectCount++;
-      btn.classList.add('correct');
+      btn.classList.add('correct','flash-correct');
     } else {
-      btn.classList.add('wrong');
+      btn.classList.add('wrong','flash-wrong');
     }
     document.querySelectorAll('.math-answer-btn').forEach(b => b.disabled = true);
     setTimeout(() => {
@@ -1247,8 +1280,8 @@ button{ font-family:inherit; }
       const [a, b] = memoryFlipped;
       if (memoryIcons[a] === memoryIcons[b]){
         memoryMatched[a] = true; memoryMatched[b] = true;
-        document.getElementById('memory-card-' + a).classList.add('matched','solved');
-        document.getElementById('memory-card-' + b).classList.add('matched','solved');
+        document.getElementById('memory-card-' + a).classList.add('matched','solved','flash-correct');
+        document.getElementById('memory-card-' + b).classList.add('matched','solved','flash-correct');
         memoryFlipped = [];
         memoryLocked = false;
         if (memoryMatched.every(Boolean)){
@@ -1256,10 +1289,12 @@ button{ font-family:inherit; }
           winGame();
         }
       } else {
+        document.getElementById('memory-card-' + a).classList.add('flash-wrong');
+        document.getElementById('memory-card-' + b).classList.add('flash-wrong');
         setTimeout(() => {
           [a, b].forEach(idx => {
             const c = document.getElementById('memory-card-' + idx);
-            c.classList.remove('flipped');
+            c.classList.remove('flipped','flash-wrong');
             c.innerHTML = '';
           });
           memoryFlipped = [];
