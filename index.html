@@ -830,7 +830,7 @@ button{ font-family:inherit; }
 
   // ================= CAFE THEME =================
   const CAFE_ID = new URLSearchParams(location.search).get('cafe') || 'demo';
-  let CAFE = { id: CAFE_ID, name: 'خماس', primary: '#0A1A16', accent: '#3FC088', highlight: '#0E2620', logo: null, limit: 15, discount: '١٥٪ خصم', active: true, game: 'crossword', socials: {} };
+  let CAFE = { id: CAFE_ID, name: 'خماس', primary: '#0A1A16', accent: '#3FC088', highlight: '#0E2620', logo: null, limit: null, discount: '١٥٪ خصم', active: true, game: 'crossword', socials: {} };
   let PLAYER_NAME = '';
   let PLAYER_PHONE = '';
 
@@ -845,7 +845,7 @@ button{ font-family:inherit; }
           accent: data.accent || CAFE.accent,
           highlight: data.highlight || CAFE.highlight,
           logo: data.logo || null,
-          limit: data.limit || 15,
+          limit: (data.limit === null || data.limit === undefined || data.limit === '') ? null : Number(data.limit),
           discount: data.discount || CAFE.discount,
           active: data.active !== false,
           game: data.game || 'crossword',
@@ -964,7 +964,12 @@ button{ font-family:inherit; }
   async function refreshStockBadge(){
     try {
       const r = await api('/api/stock?cafe=' + encodeURIComponent(CAFE.id));
+      if (CAFE.limit == null) {
+      $('stock-badge').style.display = 'none';
+    } else {
+      $('stock-badge').style.display = '';
       $('stock-num').textContent = toArabicDigits(r.left);
+    }
       $('stock-badge').style.display = r.left > 0 ? 'flex' : 'none';
     } catch(e){ $('stock-badge').style.display = 'none'; }
   }
