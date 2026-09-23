@@ -438,6 +438,103 @@ button{ font-family:inherit; }
   *{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
 }
 :focus-visible{ outline:2.5px solid var(--glow); outline-offset:3px; }
+
+/* ===================== DESKTOP & LAPTOP LAYOUT ===================== */
+/* نفس ترتيب الجوال (تحت بعض) لكن بمقاسات مريحة للشاشات الكبيرة */
+@media (min-width: 1024px){
+
+  #stage{ max-width: 980px; }
+
+  /* خريطة الخلفية أكبر لتناسب العرض */
+  .ksa-bg-motif{ max-width: 640px; }
+
+  /* الشعارات */
+  .topbar{ padding: 28px 48px 8px; }
+  .topbar-side img{ height: 34px; }
+  .topbar-side .cafe-logo{ max-height: 84px; max-width: 180px; }
+  .day-badge-logo{ height: 104px; }
+
+  /* كل شاشة في المنتصف بعرض مريح */
+  .screen{
+    width: 100%;
+    max-width: 680px;
+    align-self: center;
+    padding: 28px 24px 40px;
+  }
+
+  /* الشاشة الرئيسية */
+  .landing-title{ font-size: 3rem; margin: 30px 0 16px; }
+  .landing-sub{ max-width: 440px; font-size: 1.08rem; }
+  .btn-primary,
+  .btn-ghost{ max-width: 320px; }
+  .time-badge{ font-size: .86rem; }
+  .stock-badge{ font-size: .84rem; }
+
+  /* نافذة التعليمات والتسجيل: في منتصف الشاشة بدل أسفلها */
+  #sheet-instructions.active{ align-items: center; }
+  .sheet{
+    max-width: 520px;
+    border-radius: 26px;
+    border-bottom: 1px solid var(--panel-line);
+    padding: 30px 34px 34px;
+  }
+
+  /* رأس التحدي والمؤقت */
+  .cw-header{ margin-bottom: 24px; }
+  .cw-timer, .cw-timer svg{ width: 60px; height: 60px; }
+  .cw-title{ font-size: .88rem; }
+  .cw-title b{ font-size: 1.1rem; }
+
+  /* الكلمات المتقاطعة */
+  .clues{ max-width: 520px; margin: 0 auto 22px; width: 100%; }
+  .clue{ font-size: .92rem; padding: 12px 16px; }
+  .grid{ gap: 10px; }
+  .cell{ width: 72px; height: 72px; font-size: 1.7rem; border-radius: 15px; }
+  .bank{ gap: 14px; max-width: 520px; margin-left: auto; margin-right: auto; }
+  .tile{ width: 58px; height: 58px; font-size: 1.6rem; }
+  .bank-label{ font-size: .84rem; }
+
+  /* البزل */
+  .puzzle-grid{ width: 400px; gap: 8px; }
+
+  /* التحدي الحسابي */
+  .math-question{ font-size: 3.4rem; margin: 40px 0 36px; }
+  .math-answers{ width: 440px; gap: 16px; }
+  .math-answer-btn{ font-size: 1.6rem; padding: 24px 10px; }
+
+  /* لعبة الذاكرة */
+  .memory-grid{ width: 480px; gap: 10px; }
+
+  /* شاشة الفوز والكوبون */
+  .win-sub{ font-size: 1.05rem; }
+  .coupon,
+  .soldout-card{
+    width: 100%;
+    max-width: 460px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .next-title{ font-size: 1.5rem; }
+
+  /* انتهاء الوقت / غير متاح */
+  .timesup-title{ font-size: 2.3rem; }
+  .timesup-sub, .timesup-sub2{ font-size: 1.05rem; }
+
+  /* الفوتر */
+  .site-footer{ padding-inline: 48px; }
+  .footer-logo, .footer-cafe-logo{ height: 22px; }
+  .footer-icons a{ width: 30px; height: 30px; }
+  .footer-icons a svg{ width: 14px; height: 14px; }
+}
+
+/* الشاشات الكبيرة جدًا */
+@media (min-width: 1440px){
+  #stage{ max-width: 1100px; }
+  .puzzle-grid{ width: 440px; }
+  .memory-grid{ width: 520px; }
+}
+
+
 </style>
 </head>
 <body>
